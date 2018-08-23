@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<style>
+			
+		</style>
+	</head>
+
+	<body>
+		<script src="js/mui.min.js"></script>
+		<script type="text/javascript">
+			(function($,doc){
+				$.init({
+				gestureConfig:{
+					tap: true, //默认为true
+					doubletap: true, //默认为false
+					longtap: true, //默认为false
+					swipe: true, //默认为true
+				  	}
+				});
+				
+				$.plusReady(function(){
+					
+					let content = ['home.html','films.html'];
+					let self = plus.webview.currentWebview()
+					let webview_obj = createContentWebview(content); 
+					let active_webview = content[0];
+					
+					function createContentWebview(content){
+						let webview_obj = {};
+						content.forEach(item => {
+							let contentWebview = plus.webview.create('./pages/' + item, content)
+							self.append(contentWebview);
+							webview_obj[item] = contentWebview
+							if(item !== 'home.html'){
+								contentWebview.hide();
+							}
+						})
+						return webview_obj
+					}
+					
+					window.addEventListener('switchWebviewById',function(e){
+						var page_id = e.detail.page_id;
+						switchWebviewById(page_id)
+					})
+					
+					function switchWebviewById(id){
+						if(id === active_webview) return false;
+						hideAllWebview();
+						active_webview = id;
+						webview_obj[id].show()
+ 					}
+					
+					function hideAllWebview(){
+						for(var key in webview_obj){
+							webview_obj[key].hide()
+						}
+					}
+					
+				})
+				
+			})(mui,window)
+			
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,21 @@
+{
+	"index.html": {
+		"resources": [
+			"header.html"
+		],
+		"refer": [
+			"header.html",
+			"nav.html",
+			"main.html"
+		]
+	},
+	"main.html": {
+		"resources": [
+			"pages/home.html"
+		],
+		"refer": [
+			"pages/home.html",
+			"pages/films.html"
+		]
+	}
+}

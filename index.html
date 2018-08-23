@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title></title>
+    <script src="js/mui.min.js"></script>
+    <link href="css/mui.min.css" rel="stylesheet"/>
+    <script type="text/javascript" charset="utf-8">
+    	(function($,doc) {
+    		$.init({
+				gestureConfig:{
+					tap: true, //默认为true
+					doubletap: true, //默认为false
+					longtap: true, //默认为false
+					swipe: true, //默认为true
+			  	}
+			});
+    		
+    		$.plusReady(function () {
+    			//设置系统标题
+    			plus.navigator.setStatusBarBackground('#282828');
+    			//获取当前窗口
+    			let self = plus.webview.currentWebview();
+    			let headerWebview = createHeaderWebview(self);
+    			let navWebview = createNavWebview(self);
+    			let mainWebview = createMainWebview(self);
+    			mainWebview.addEventListener('maskClick',function(){
+    				closeMenu();
+    			})
+  				mainWebview.addEventListener('maskSwipeLeft',function(){
+    				closeMenu();
+    			})
+    			let isOpen = false;
+    			let isChanging = false;
+    			
+    			
+    			window.addEventListener('menu:toggle',function(){
+	    			if(isOpen){
+	    				closeMenu();
+	    			} else {
+	    				openMenu();
+	    			}
+	    		})
+    			
+	    		function closeMenu(){
+	    			if(!isOpen) return false
+	    			if(isChanging) return false;
+	    			isChanging = true;
+	    			navWebview.hide('slide-out-left',300)
+	    			mainWebview.setStyle({mask: 'none'})
+	    			setTimeout(function() {
+	    				isChanging = false;
+	    				isOpen = false;
+	    			},310)
+	    		}
+	    		window.addEventListener('nav:close',function(){
+	    			closeMenu();
+	    		})
+	    		window.addEventListener('nav:open',function(){
+	    			openMenu();
+	    		})
+	    		function openMenu(){
+	    			if(isOpen) return false;
+	    			if(isChanging) return false;
+	    			isChanging = true;
+	    			navWebview.show('slide-in-left',300)
+	    			mainWebview.setStyle({mask: 'rgba(0,0,0,0.3)'})
+	    			setTimeout(function(){
+	    				isChanging = false;
+	    				isOpen = true;
+	    			},310)
+	    		}
+    		})
+    		function createHeaderWebview(current){
+    			let headerWebview = plus.webview.create('header.html','header.html',{
+    				height: '50px',
+    				zindex: 100
+    			})
+    			headerWebview.show();
+    			current.append(headerWebview);
+    			return headerWebview;
+    		}
+    		function createNavWebview(current) {
+    			let navWebview = plus.webview.create('nav.html','nav.html',{
+    				width: '70%',
+    				top: '50px',
+    			})
+    			current.append(navWebview)
+    			navWebview.hide();
+    			return navWebview;
+    		}
+    		function createMainWebview(current) {
+    			let mainWebview = plus.webview.create('main.html','main.html',{
+    				background: 'blue',
+    				top: '50px'
+    			})
+    			mainWebview.show()
+    			current.append(mainWebview);
+    			return mainWebview;
+    		}
+    	})(mui,window)      	
+      	
+    </script>
+</head>
+<body>
+	
+</body>
+</html>
+
