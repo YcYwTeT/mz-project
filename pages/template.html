@@ -12,26 +12,16 @@
 	</head>
 
 	<body>
-		<div id="films" class="mui-content"></div>
+		<div id="films">films</div>
 		
 		<script type="text/javascript">
 			
 			(function($,doc){
+				mui.init()
 				$.plusReady(function(){
+					
 					new Vue({
-						el: '#films',
-						created(){
-							$.init({
-							    subpages:[{
-									url:'films-content.html',
-									id:'films-content.html',
-									styles:{
-										top: '0px',
-										bottom: '50px',
-									}
-								}]
-							});
-						}
+						el: '#films'
 					})
 				})
 			})(mui,window)

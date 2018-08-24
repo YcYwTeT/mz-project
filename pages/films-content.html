@@ -1,0 +1,261 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/vue.js"></script>
+		<script src="../js/axios.js"></script>
+		<style>
+			*{box-sizing: border-box;}
+			html,body{width:100%;height:100%;}
+			.films-content{
+				padding-left: 15px;
+			    padding-right: 15px;
+			    background-color: #f9f9f9;
+			    width: 100%;
+			    position: relative;
+			    min-height: 100%;
+			}
+			.films-buttons{
+				display:flex;
+				justify-content: center;
+				align-items: center;
+				height: 0.46rem;
+			    border-bottom: solid #fe6e00 1px;
+			}
+			.films-buttons span{
+			    float: left;
+			    width: 50%;
+			    height: 100%;
+			    text-align: center;
+			    font-size: 16px;
+			    line-height: 0.46rem;
+			    color: #6a6a6a;
+			    cursor: pointer;
+			    border: none;
+			    background-color: #f9f9f9;
+			    border-radius: 0;
+			}
+			.films-buttons .active{
+				color: #fe6e00;
+    			border-bottom: 2px solid;
+			}
+			.movie-item{
+				width: 100%;
+			    padding: 20px 0;
+			    border-bottom: dashed 1px #c9c9c9;
+			    cursor: pointer;
+			    box-sizing: border-box;
+			    display: flex;
+			    height: 1.25rem;
+			}
+			.movie-item .img-box{
+				width: 0.6rem;
+				height: 0.8256rem;
+				background: url(../images/films_small_bg.png) no-repeat center center;
+				background-size: 100% 100%;
+				overflow: hidden;
+			}
+			.movie-item-info{
+				padding-left: 15px;
+			    width: 75%;
+			    position: relative;
+			}
+			.movie-item-info .name{
+				font-size: 16px;
+			    line-height: 32px;
+			    color: #000;
+			    overflow: hidden;
+			    text-overflow: ellipsis;
+			    white-space: nowrap;
+			}
+			.movie-item-info .desc{
+				height: 0.24rem;
+			    line-height: 0.24rem;
+			    color: #8e8e8e;
+			    font-size: 12px;
+			    overflow: hidden;
+			    text-overflow: ellipsis;
+			    white-space: nowrap;
+			    width: 100%;
+			}
+			.movie-item-info .time{
+				line-height: 0.24rem;
+			    color: #8e8e8e;
+			    font-size: 12px;
+			}
+			.movie-item-info .grade-icon{
+				position: absolute;
+				right: 0px;
+				top: 10px;
+				display: flex;
+				align-items: center;
+			}
+			.movie-item-info .grade{
+			    font-size: 16px;
+			    color: #fc7103;
+			}
+			.movie-item-info i{
+				font-size: 12px;
+				
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="films-content" class="films-content mui-content mui-scroll-wrapper">
+			<div class="mui-scroll">
+				<films-buttons :change-type="changeType" :types="types" :type="type"></films-buttons>
+				<movie-box :type="type"></movie-box>
+			</div>
+		</div>
+		<template id="films-buttons">
+			<div class="films-buttons">
+				<span @tap="changeType(mold.type)" :class="{active: mold.type===type}" v-for="mold in types" :key="mold.id">{{mold.title}}</span>
+			</div>
+		</template>
+		<template id="movie-box">
+			<div class="movie-box">
+				<movie-item :film="film" v-for="film in films" :key="film.id"></movie-item>
+			</div>
+		</template>
+		<template id="movie-item">
+			<div class="movie-item">
+				<div class="img-box">
+					<img width="100%" :src="film.poster.origin" alt="" />
+				</div>
+				<div class="movie-item-info">
+					<div class="name">{{film.name}}</div>
+					<div class="desc">{{film.intro}}</div>
+					<div class="time">
+						<span>{{film.cinemaCount}}家影院上映</span>
+						<span>{{film.watchCount}}人购票</span>
+					</div>
+					<div class="grade-icon">
+						<div class="grade">{{film.grade}}</div>
+						<i class="mui-icon mui-icon-arrowright"></i>
+					</div>
+				</div>
+			</div>
+		</template>
+		<script type="text/javascript">
+			
+			(function($,doc){
+				$.plusReady(function(){
+					Vue.component('movie-item',{
+						template: '#movie-item',
+						props: ['film']
+					})
+					Vue.component('movie-box',{
+						template: '#movie-box',
+						data(){
+							return{
+								films: [],
+								page: 1,
+								total: null,
+								current: null
+							}
+						},
+						props: ['type'],
+						methods: {
+							getFilms(callback){
+								axios.get('https://m.maizuo.com/v4/api/film/' + this.type,{
+									params:{
+										page: this.page,
+										count: 7
+									}
+								}).then(res => {
+									this.films = this.films.concat(res.data.data.films);
+									this.total = res.data.data.page.total;
+									this.current = res.data.data.page.current;
+									let hasMore = this.total - this.current > 0;
+									if(callback) {
+										callback(!hasMore);
+									}
+								})
+							},
+							initial(){
+								mui.init({
+									pullRefresh: {
+										container: '#films-content',
+										up: {
+											contentrefresh: '官人我要...',
+											callback: this.pullupRefresh
+										}
+									}
+								})
+							},
+							scrollInitial(){
+								window.addEventListener('scroll',function(){
+//									console.log(scrollY)
+									if(scrollY > 100){
+										console.log(1)
+									}
+								})
+							},
+							pullupRefresh(){
+								++this.page;
+								this.getFilms((hasMore) => {
+									if(!hasMore){
+										mui('#films-content').pullRefresh().refresh(true);
+									}
+									mui('#films-content').pullRefresh().endPullupToRefresh(hasMore)
+								})
+							}
+						},
+						watch: {
+							type: {
+								immediate: true,
+								handler(val,oldVal){
+									if(val !== oldVal){
+										this.page = 1;
+										this.films = [];
+										
+										this.pullupRefresh()
+									}
+								}
+							}
+						},
+						mounted(){
+							this.initial();
+							this.scrollInitial();
+						}
+					})
+					
+					Vue.component('films-buttons',{
+						template: '#films-buttons',
+						data(){
+							return {
+								active_button_id: 1
+							}
+						},
+						props: ['types','changeType','type']
+					})
+					
+					new Vue({
+						el: '#films-content',
+						data: {
+							types:[
+								{id: 1,title: '正在热映',type: 'now-playing'},
+								{id: 2,title: '即将上映',type: 'coming-soon'}
+							],
+							//************************************
+							type: 'now-playing'
+						},
+						methods: {
+							changeType(type){
+								this.type = type;
+							}
+						},
+					})
+				})
+			})(mui,window)
+			
+		</script>
+	</body>
+
+</html>

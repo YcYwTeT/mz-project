@@ -140,7 +140,13 @@
 						}
 					},
 					created(){
-						this.getBillboards() 
+						this.getBillboards() ;
+						let self = plus.webview.getWebviewById('main.html');
+						mui.fire(self,'switchWebviewById',{page_id:'loading.html'});
+						setTimeout(() => {
+							mui.fire(self,'switchWebviewById',{page_id:'home.html'});
+						},300)
+						plus.webview.close('loading.html');
 					}
 				})
 				
@@ -168,7 +174,7 @@
 					},
 					created(){
 						this.getFilms()
-						console.log(this.type.type)
+//						console.log(this.type.type)
 					}
 				})
 				Vue.component('home-content-item',{

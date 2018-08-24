@@ -67,12 +67,25 @@
 			</div>
 		</div>
 		<script type="text/javascript">
-			mui.init()
-			mui('.header').on('tap','.mui-icon-bars',function() {
-//				let self = plus.webview.getWebviewById('index.html');
-				let self = plus.webview.getLaunchWebview();
-				mui.fire(self,'menu:toggle')
-			})
+			(function($,doc){
+				mui.init({
+					gestureConfig:{
+					   tap: true, //默认为true
+					   doubletap: true, //默认为false
+					  }
+				})
+				mui('.header').on('tap','.mui-icon-bars',function() {
+	//				let self = plus.webview.getWebviewById('index.html');
+					let self = plus.webview.getLaunchWebview();
+					mui.fire(self,'menu:toggle')
+				})
+				let header = document.querySelector('.header');
+				header.addEventListener('doubletap',function(){
+					console.log(1)
+					let contentWebview = plus.webview.getWebviewById('films-content.html');
+					contentWebview.evalJS("mui('#films-content').pullRefresh().scrollTo(0,0,50)")
+				})
+			})(mui,window)
 		</script>
 	</body>
 

@@ -15,7 +15,26 @@
 		],
 		"refer": [
 			"pages/home.html",
-			"pages/films.html"
+			"pages/films.html",
+			"pages/loading.html"
+		]
+	},
+	"pages/home.html": {
+		"refer": [
+			"pages/loading.html"
+		],
+		"resources": [
+			"pages/loading.html"
+		]
+	},
+	"pages/films.html": {
+		"resources": [
+			"pages/pullrefresh_sub.html",
+			"pages/films-content.html"
+		],
+		"refer": [
+			"pages/pullrefresh_sub.html",
+			"pages/films-content.html"
 		]
 	}
 }

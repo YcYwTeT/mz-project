@@ -143,8 +143,24 @@
 					"pages/home.html"
 				],
 				"refer": [
-					"pages/films.html"
+					"pages/films.html",
+					"pages/loading.html"
 				],
+				"priority": 0
+			},
+			"pages/home.html": {
+				"resources": [
+					"pages/loading.html"
+				],
+				"refer": [],
+				"priority": 0
+			},
+			"pages/films.html": {
+				"resources": [
+					"pages/pullrefresh_sub.html",
+					"pages/films-content.html"
+				],
+				"refer": [],
 				"priority": 0
 			}
 		},
