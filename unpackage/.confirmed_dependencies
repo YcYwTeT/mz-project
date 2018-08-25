@@ -6,7 +6,8 @@
 		"refer": [
 			"header.html",
 			"nav.html",
-			"main.html"
+			"main.html",
+			"totop.html"
 		]
 	},
 	"main.html": {
@@ -16,7 +17,11 @@
 		"refer": [
 			"pages/home.html",
 			"pages/films.html",
-			"pages/loading.html"
+			"pages/loading.html",
+			"component/loading.html",
+			"pages/detail.html",
+			"pages/login.html",
+			"pages/mine.html"
 		]
 	},
 	"pages/home.html": {

@@ -82,11 +82,11 @@
 		<template id="home-content-list">
 			<div class="home-content-list">
 				<home-content-item v-for="film in films" :key="film.id" :film="film" :type="type" 				:type="type"></home-content-item>
-				<button>更多{{type.title}}</button>
+				<button @tap="more(type.type)">更多{{type.title}}</button>
 			</div>
 		</template>
 		<template id="home-content-item">
-			<div class="home-content-item">
+			<div class="home-content-item" @tap="switchDetail(film.id)">
 				<div class="img-box">
 					<img width="100%" :src="film.cover.origin" alt="" />
 				</div>
@@ -125,7 +125,7 @@
 					},
 					methods: {
 						getBillboards() {
-							axios.get('https://m.maizuo.com/v4/api/billboard/home?__t='+ 							Date.now()).then(res=> {
+							axios.get('https://m.maizuo.com/v4/api/billboard/home?__t='+Date.now()).then(res=> {
 								this.billboards = res.data.data.billboards;
 								Vue.nextTick(() => {
 									new Swiper(this.$refs.el,{
@@ -137,7 +137,8 @@
 									})
 								})
 							})
-						}
+						},
+						
 					},
 					created(){
 						this.getBillboards() ;
@@ -170,16 +171,39 @@
 							}).then( res=> {
 								 this.films = res.data.data.films;
 							})
+						},
+						more(id){
+							let main = plus.webview.getWebviewById('main.html');
+							let nav = plus.webview.getWebviewById('nav.html');
+							mui.fire(nav,'change-activeId',{
+								activeId: 'films.html'
+							})
+							mui.fire(main,'switchWebviewById',{
+								page_id: 'films.html',
+								type: id
+							})
 						}
 					},
 					created(){
 						this.getFilms()
-//						console.log(this.type.type)
 					}
 				})
 				Vue.component('home-content-item',{
 					template: '#home-content-item',
 					props: ['film','type'],
+					methods: {
+						switchDetail(film_id){
+							let main = plus.webview.getWebviewById('main.html');
+							mui.fire(main,'switchWebviewById',{
+								page_id: 'detail.html',
+								film_id,
+							})
+							let nav = plus.webview.getWebviewById('nav.html');
+							mui.fire(nav,'change-activeId',{
+								activeId: 'detail.html'
+							})
+						}
+					}
 				})
 				
 				

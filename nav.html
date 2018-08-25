@@ -47,28 +47,32 @@
 						{id:1,title:'首页',page:'home.html'},
 						{id:2,title:'影片',page:'films.html'},
 						{id:3,title:'影院',page:'loading.html'},
-						{id:4,title:'商城',page:'home.html'},
-						{id:5,title:'我的',page:'home.html'},
-						{id:6,title:'卖座卡',page:'home.html'}
+						{id:4,title:'商城',page:'detail.html'},
+						{id:5,title:'我的',page:'mine.html'},
+						{id:6,title:'卖座卡',page:'login.html'}
 					],
 					activeId: 'home.html'
 				},
 				methods: {
 					handleChange(id){
+						console.log(id)
 						let self = plus.webview.getLaunchWebview();
 						mui.fire(self,'nav:close');
-						if(this.activeId !== id) {
-							this.activeId = id;
-							let mainWebview = plus.webview.getWebviewById('main.html');
-							mui.fire(mainWebview,'switchWebviewById',{page_id:'loading.html'});
-							setTimeout(() => {
-								mui.fire(mainWebview,'switchWebviewById',{
-									page_id: id
-								})
-							},300)
-							
-						}
+						if(this.activeId === id) return false;
+						this.activeId = id;
+						let mainWebview = plus.webview.getWebviewById('main.html');
+						mui.fire(mainWebview,'switchWebviewById',{page_id:'loading.html'});
+						setTimeout(() => {
+							mui.fire(mainWebview,'switchWebviewById',{
+								page_id: id
+							})
+						},300)
 					}
+				},
+				mounted(){
+					window.addEventListener('change-activeId',(e) => {
+						this.activeId = e.detail.activeId;
+					})
 				}
 			})
 		</script>

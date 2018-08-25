@@ -26,17 +26,22 @@
 				
 				$.plusReady(function(){
 					
-					let content = ['home.html','films.html','loading.html'];
+					let content = ['home.html','films.html','detail.html','loading.html','main.html','mine.html','login.html'];
 					let self = plus.webview.currentWebview()
 					let webview_obj = createContentWebview(content); 
 					let active_webview = content[0];
-					
 					function createContentWebview(content){
 						let webview_obj = {};
 						content.forEach(item => {
-							let contentWebview = plus.webview.create('./pages/' + item, content)
-							self.append(contentWebview);
+							let contentWebview;
+							
+							if(item === 'loading.html'){
+								contentWebview = plus.webview.create('./component/' + item, content)
+							} else {
+								contentWebview = plus.webview.create('./pages/' + item, content)
+							}
 							webview_obj[item] = contentWebview
+							self.append(contentWebview)
 							if(item !== 'home.html'){
 								contentWebview.hide();
 							}
@@ -45,20 +50,50 @@
 					}
 					
 					window.addEventListener('switchWebviewById',function(e){
-						var page_id = e.detail.page_id;
-						switchWebviewById(page_id)
+						let page_id = e.detail.page_id;
+						let type = e.detail.type || 'now-playing';
+						let film_id = e.detail.film_id;
+						
+						if(page_id === 'films.html'){
+							mui.fire(webview_obj[page_id].children()[0],'change-type',{
+								type: type
+							})
+						}
+						if(page_id === 'mine.html' && !localStorage.user_info ){
+							page_id = 'login.html'
+						}
+//						if(page_id === 'detail.html'){
+//							let detail_actual = plus.webview.create('https://m.maizuo.com/v4/#!/film/' + film_id,'https://m.maizuo.com/v4/#!/film/' + film_id)
+//							detail_actual.evalJS("$('#toolbar')[0].remove();$('.application-view').css({padding:0})")
+//							self.append(detail_actual) 
+//						}else {
+							switchWebviewById(page_id,film_id)
+//						}
 					})
 					
-					function switchWebviewById(id){
+					function switchWebviewById(id,film_id){
 						if(id === active_webview) return false;
+						
 						hideAllWebview();
 						active_webview = id;
-						webview_obj[id].show()
+						
+						if(id === 'detail.html'){
+							let detailWebview = plus.webview.create('https://m.maizuo.com/v4/#!/film/' + film_id);
+							detailWebview.evalJS("$('#toolbar')[0].remove();$('.application-sidebar').remove();$('.application-view').css({padding: 0});$('.operation').css({bottom: '60px'});")
+							webview_obj[id] = detailWebview;
+							self.append(detailWebview);
+						} else {
+							webview_obj[id].show()
+						}
  					}
 					
 					function hideAllWebview(){
 						for(var key in webview_obj){
-							webview_obj[key].hide()
+							if(key === 'detail.html'){
+								webview_obj[key].close();
+							} else {
+								webview_obj[key].hide()
+							}
 						}
 					}
 					

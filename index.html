@@ -31,7 +31,6 @@
     			let isOpen = false;
     			let isChanging = false;
     			
-    			
     			window.addEventListener('menu:toggle',function(){
 	    			if(isOpen){
 	    				closeMenu();
@@ -69,10 +68,13 @@
 	    			},310)
 	    		}
     		})
+
     		function createHeaderWebview(current){
     			let headerWebview = plus.webview.create('header.html','header.html',{
     				height: '50px',
-    				zindex: 100
+    				zindex: 100,
+    				top: 0,
+    				left: 0
     			})
     			headerWebview.show();
     			current.append(headerWebview);
@@ -92,7 +94,6 @@
     				background: 'blue',
     				top: '50px'
     			})
-    			mainWebview.show()
     			current.append(mainWebview);
     			return mainWebview;
     		}

@@ -81,9 +81,8 @@
 				})
 				let header = document.querySelector('.header');
 				header.addEventListener('doubletap',function(){
-					console.log(1)
 					let contentWebview = plus.webview.getWebviewById('films-content.html');
-					contentWebview.evalJS("mui('#films-content').pullRefresh().scrollTo(0,0,50)")
+					contentWebview.evalJS("mui('#films-content').pullRefresh().scrollTo(0,0,100)")
 				})
 			})(mui,window)
 		</script>

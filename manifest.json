@@ -134,7 +134,8 @@
 				],
 				"refer": [
 					"nav.html",
-					"main.html"
+					"main.html",
+					"totop.html"
 				],
 				"priority": 0
 			},
@@ -144,7 +145,11 @@
 				],
 				"refer": [
 					"pages/films.html",
-					"pages/loading.html"
+					"pages/loading.html",
+					"component/loading.html",
+					"pages/detail.html",
+					"pages/login.html",
+					"pages/mine.html"
 				],
 				"priority": 0
 			},

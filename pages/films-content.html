@@ -88,9 +88,17 @@
 			    color: #8e8e8e;
 			    font-size: 12px;
 			}
+			.movie-item-info .play-time{
+				line-height: 24px;
+			    color: #ffb375;
+			    font-size: 12px;
+			}
+			.movie-item-info .play-time span:first-child{
+				margin-right: 5px;
+			}
 			.movie-item-info .grade-icon{
 				position: absolute;
-				right: 0px;
+				right: -20px;
 				top: 10px;
 				display: flex;
 				align-items: center;
@@ -103,6 +111,19 @@
 				font-size: 12px;
 				
 			}
+			.to-top{
+				position: fixed;
+				width: 0.50rem;
+				height: 0.5rem;
+				border-radius: 50%;
+				background: #ccc;
+				line-height: 0.5rem;
+				text-align: center;
+				bottom: 40px;
+				right: 20px;
+				opacity: 0.2;
+				z-index: 1000;
+			}
 		</style>
 	</head>
 
@@ -112,6 +133,9 @@
 				<films-buttons :change-type="changeType" :types="types" :type="type"></films-buttons>
 				<movie-box :type="type"></movie-box>
 			</div>
+			<transition enter-active-class="slideInRight" leave-active-class="slideOutRight">
+				<to-top v-if="toTopShow"></to-top>
+			</transition>
 		</div>
 		<template id="films-buttons">
 			<div class="films-buttons">
@@ -120,7 +144,7 @@
 		</template>
 		<template id="movie-box">
 			<div class="movie-box">
-				<movie-item :film="film" v-for="film in films" :key="film.id"></movie-item>
+				<movie-item :type="type" :film="film" v-for="film in films" :key="film.id"></movie-item>
 			</div>
 		</template>
 		<template id="movie-item">
@@ -131,9 +155,13 @@
 				<div class="movie-item-info">
 					<div class="name">{{film.name}}</div>
 					<div class="desc">{{film.intro}}</div>
-					<div class="time">
+					<div class="time" v-if="type === 'now-playing'">
 						<span>{{film.cinemaCount}}家影院上映</span>
 						<span>{{film.watchCount}}人购票</span>
+					</div>
+					<div class="play-time" v-else>
+						<span>{{film.premiereAt | handle-date}}</span>
+						<span>{{'星期' + handleWeek(film.premiereAt)}}</span>
 					</div>
 					<div class="grade-icon">
 						<div class="grade">{{film.grade}}</div>
@@ -142,13 +170,44 @@
 				</div>
 			</div>
 		</template>
+		<template id="to-top">
+			<div class="to-top" @tap="toTop">
+				<i class="mui-icon mui-icon-arrowup"></i>
+			</div>
+		</template>
 		<script type="text/javascript">
 			
 			(function($,doc){
 				$.plusReady(function(){
+					
+					//过滤器
+					Vue.filter('handle-date',(date) => {
+						date = new Date(date);
+						let month = date.getMonth() + 1;
+						let day = date.getDate();
+						let week = date.getDay();
+						return month + '月' + day + '日上映'
+					})
+					
+					Vue.component('to-top',{
+						template: '#to-top',
+						methods: {
+							toTop(){
+								mui('#films-content').pullRefresh().scrollTo(0,0,100)
+							}
+						}
+					})
 					Vue.component('movie-item',{
 						template: '#movie-item',
-						props: ['film']
+						props: ['film','type'],
+						methods: {
+							handleWeek(date){
+								date = new Date(date);
+								let week = date.getDay();
+								let weekArr = ['一','二','三','四','五','六','日']
+								return weekArr[week - 1]
+							}
+						}
 					})
 					Vue.component('movie-box',{
 						template: '#movie-box',
@@ -157,7 +216,6 @@
 								films: [],
 								page: 1,
 								total: null,
-								current: null
 							}
 						},
 						props: ['type'],
@@ -170,9 +228,10 @@
 									}
 								}).then(res => {
 									this.films = this.films.concat(res.data.data.films);
-									this.total = res.data.data.page.total;
-									this.current = res.data.data.page.current;
-									let hasMore = this.total - this.current > 0;
+									if(!this.total){
+										this.total = res.data.data.page.total;
+									}
+									let hasMore = this.total - this.page > 0;
 									if(callback) {
 										callback(!hasMore);
 									}
@@ -184,28 +243,20 @@
 										container: '#films-content',
 										up: {
 											contentrefresh: '官人我要...',
-											callback: this.pullupRefresh
+											callback: this.pullupRefresh,
 										}
 									}
 								})
 							},
-							scrollInitial(){
-								window.addEventListener('scroll',function(){
-//									console.log(scrollY)
-									if(scrollY > 100){
-										console.log(1)
-									}
-								})
-							},
 							pullupRefresh(){
-								++this.page;
 								this.getFilms((hasMore) => {
 									if(!hasMore){
 										mui('#films-content').pullRefresh().refresh(true);
 									}
 									mui('#films-content').pullRefresh().endPullupToRefresh(hasMore)
 								})
-							}
+								this.page++;
+							},
 						},
 						watch: {
 							type: {
@@ -214,7 +265,6 @@
 									if(val !== oldVal){
 										this.page = 1;
 										this.films = [];
-										
 										this.pullupRefresh()
 									}
 								}
@@ -222,7 +272,6 @@
 						},
 						mounted(){
 							this.initial();
-							this.scrollInitial();
 						}
 					})
 					
@@ -244,13 +293,34 @@
 								{id: 2,title: '即将上映',type: 'coming-soon'}
 							],
 							//************************************
-							type: 'now-playing'
+							type: '',
+							toTopShow: false
 						},
 						methods: {
 							changeType(type){
 								this.type = type;
-							}
+							},
+							scrollInitial(){
+								window.addEventListener('scroll',() => {
+									if(scrollY > 100){
+										
+										if(!this.toTopShow){
+											this.toTopShow = true;
+										}
+									} else {
+										if(this.toTopShow){
+											this.toTopShow = false;
+										}
+									}
+								})
+							},
 						},
+						mounted(){
+							this.scrollInitial();
+							window.addEventListener('change-type',(e) => {
+								this.type = e.detail.type;
+							})
+						}
 					})
 				})
 			})(mui,window)
